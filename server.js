@@ -11,7 +11,7 @@ const app = express();
 const API_URL = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
 const API_KEY = process.env.API_KEY;
 const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.SERVER_PORT || 3001;
 
 // 验证API密钥是否存在
 if (!API_KEY) {
@@ -21,7 +21,7 @@ if (!API_KEY) {
 
 // CORS配置
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204
