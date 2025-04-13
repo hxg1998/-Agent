@@ -12,8 +12,14 @@ if (!API_KEY && process.env.NODE_ENV === 'production') {
   throw new Error('API密钥未配置');
 }
 
-// 本地代理API - 使用完整URL，包含主机和端口
-const LOCAL_PROXY_URL = 'http://localhost:3001/api/chat';
+// 根据环境选择API端点
+// 在Vercel上使用相对路径，在本地开发使用完整URL
+const LOCAL_PROXY_URL = process.env.NODE_ENV === 'production' 
+  ? '/api/chat' 
+  : 'http://localhost:3001/api/chat';
+
+console.log('当前环境:', process.env.NODE_ENV);
+console.log('使用API端点:', LOCAL_PROXY_URL);
 
 // 创建axios实例，添加超时设置和重试
 const apiClient = axios.create({

@@ -1,5 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-  <path d="M2.66667 11.3333V3.33333C2.66667 2.96667 2.96667 2.66667 3.33333 2.66667H12.6667C13.0333 2.66667 13.3333 2.96667 13.3333 3.33333V9.33333C13.3333 9.7 13.0333 10 12.6667 10H4.66667L2.66667 11.3333Z" stroke="black" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M5 6H10" stroke="black" stroke-width="1.33333" stroke-linecap="round"/>
-  <path d="M5 8H8" stroke="black" stroke-width="1.33333" stroke-linecap="round"/>
-</svg> 
+version https://git-lfs.github.com/spec/v1
+oid sha256:31b0b2231d116afadf62f6891e400d270a3156832c47c5fbe9467eb7d8dd8eed
+size 563
