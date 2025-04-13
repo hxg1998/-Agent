@@ -23,7 +23,7 @@
     "dev": "concurrently \"npm run server\" \"npm run start\"",
     "kill-port": "node kill-server.js",
     "restart-server": "node kill-server.js && node server.js",
-    "vercel-build": "DISABLE_ESLINT_PLUGIN=true CI=false react-scripts build"
+    "vercel-build": "DISABLE_ESLINT_PLUGIN=true CI=false react-scripts build --no-eslint"
   },
   "eslintConfig": {
     "extends": [
