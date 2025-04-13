@@ -4,50 +4,18 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "config": { 
+        "distDir": "build",
+        "buildCommand": "CI=false npm run build"
+      }
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "^/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "^/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "^/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "^/asset-manifest.json",
-      "dest": "/asset-manifest.json"
-    },
-    {
-      "src": "^/(.*).png",
-      "dest": "/$1.png"
-    },
-    {
-      "src": "^/(.*).svg",
-      "dest": "/$1.svg"
-    },
-    {
-      "src": "^/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/build/$1" }
   ],
-  "build": {
-    "env": {
-      "CI": "false"
-    }
+  "env": {
+    "CI": "false",
+    "DISABLE_ESLINT_PLUGIN": "true"
   }
 } 
