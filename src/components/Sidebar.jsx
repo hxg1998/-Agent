@@ -4,7 +4,7 @@ import FeatureList from './FeatureList';
 import ConversationList from './ConversationList';
 
 const Sidebar = ({ onChangeConversation }) => {
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [, setSelectedFeature] = useState(null);
   
   const handleFeatureSelect = (feature) => {
     setSelectedFeature(feature);

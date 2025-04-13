@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import FormattedMessage from './FormattedMessage';
 
 const Message = ({ message, onEdit }) => {

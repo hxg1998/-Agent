@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 从环境变量加载配置（生产环境）或默认值（开发环境）
-const API_URL = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+const API_ENDPOINT = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
 const API_KEY = process.env.API_KEY; // 不提供默认值以强制配置
 const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
 

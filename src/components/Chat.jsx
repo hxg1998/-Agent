@@ -202,7 +202,7 @@ const Chat = ({ currentConversation }) => {
     
     // 清理过期的消息历史
     cleanupExpiredMessages();
-  }, [currentConversation, conversationsData]);
+  }, [currentConversation, conversationsData, loadMessagesFromStorage]);
 
   // 将消息保存到state和本地存储
   const updateMessages = (newMessages) => {
