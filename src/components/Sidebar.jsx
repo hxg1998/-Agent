@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Logo from './Logo';
 import FeatureList from './FeatureList';
 import ConversationList from './ConversationList';
 
 const Sidebar = ({ onChangeConversation }) => {
-  const [, setSelectedFeature] = useState(null);
   
   const handleFeatureSelect = (feature) => {
-    setSelectedFeature(feature);
-    
     // 通知App组件功能已更改
     if (onChangeConversation) {
       onChangeConversation({

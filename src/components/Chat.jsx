@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Message from './Message';
 import MessageInput from './MessageInput';
 import { sendMessageToDeepseek, formatMessagesForAPI } from '../services/api';
@@ -100,7 +100,7 @@ const Chat = ({ currentConversation }) => {
   }, []);
 
   // 加载历史消息
-  const loadMessagesFromStorage = (sessionId) => {
+  const loadMessagesFromStorage = useCallback((sessionId) => {
     try {
       const key = `${CHAT_HISTORY_KEY_PREFIX}${sessionId}`;
       const storedData = localStorage.getItem(key);
@@ -128,7 +128,7 @@ const Chat = ({ currentConversation }) => {
     }
     
     return conversationsData[sessionId] || [];
-  };
+  }, [conversationsData]);
 
   // 保存消息到本地存储
   const saveMessagesToStorage = (sessionId, messagesToSave) => {
