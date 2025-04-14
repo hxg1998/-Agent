@@ -1,0 +1,24 @@
+From 3628dc1067855109db24a7d2279404ad5974540e Mon Sep 17 00:00:00 2001
+From: hxg1998 <87716159+hxg1998@users.noreply.github.com>
+Date: Mon, 14 Apr 2025 15:57:58 +0800
+Subject: [PATCH] =?UTF-8?q?=E6=B7=BB=E5=8A=A0Vercel=E9=83=A8=E7=BD=B2?=
+ =?UTF-8?q?=E4=BC=98=E5=8C=96=E6=96=87=E6=A1=A3?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ README-vercel.md | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 README-vercel.md
+
+diff --git a/README-vercel.md b/README-vercel.md
+new file mode 100644
+index 0000000..e8df0c3
+--- /dev/null
++++ b/README-vercel.md
+@@ -0,0 +1 @@
++# Vercel配置
+-- 
+2.39.2 (Apple Git-143)
+
