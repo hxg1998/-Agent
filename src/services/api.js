@@ -2,31 +2,33 @@ import axios from 'axios';
 
 // 从环境变量加载配置（生产环境）或默认值（开发环境）
 // 以下环境变量配置会被使用
-const API_KEY = process.env.API_KEY; // 不提供默认值以强制配置
-const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
+const API_KEY = process.env.REACT_APP_API_KEY || process.env.API_KEY; // 支持通过REACT_APP前缀访问
+const MODEL = process.env.REACT_APP_MODEL_NAME || process.env.MODEL_NAME || 'deepseek-r1-250120';
 
-// 验证API密钥是否已配置
-if (!API_KEY && process.env.NODE_ENV === 'production') {
-  console.error('错误: API_KEY环境变量未设置。请在.env文件中配置API_KEY。');
-  // 在生产环境中，如果未设置API密钥则抛出错误
-  throw new Error('API密钥未配置');
-}
+// 验证API密钥是否已配置 - 客户端不再需要API密钥，由服务端处理
+// if (!API_KEY && process.env.NODE_ENV === 'production') {
+//   console.error('错误: API_KEY环境变量未设置。请在.env文件中配置API_KEY。');
+//   // 在生产环境中，如果未设置API密钥则抛出错误
+//   throw new Error('API密钥未配置');
+// }
 
 // 根据环境选择API端点
 // 在Vercel上使用相对路径，在本地开发使用完整URL
-const LOCAL_PROXY_URL = process.env.NODE_ENV === 'production' 
-  ? '/api/chat' 
-  : 'http://localhost:3001/api/chat';
+const LOCAL_PROXY_URL =
+  process.env.NODE_ENV === 'production' ? '/api/chat' : 'http://localhost:3001/api/chat';
 
-console.log('当前环境:', process.env.NODE_ENV);
-console.log('使用API端点:', LOCAL_PROXY_URL);
+// 在开发环境中记录配置信息
+if (process.env.NODE_ENV !== 'production') {
+  console.log('当前环境:', process.env.NODE_ENV);
+  console.log('使用API端点:', LOCAL_PROXY_URL);
+}
 
 // 创建axios实例，添加超时设置和重试
 const apiClient = axios.create({
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-  timeout: 180000 // 增加超时时间到180秒，以便接收更复杂的回复
+  timeout: 60000, // 减少超时时间到60秒，避免Vercel函数超时
 });
 
 /**
@@ -34,7 +36,7 @@ const apiClient = axios.create({
  * @param {Array} messages - 消息历史数组，包含系统消息和用户消息
  * @returns {Promise} Promise对象，解析为API响应
  */
-export const sendMessageToDeepseek = async (messages) => {
+export const sendMessageToDeepseek = async messages => {
   try {
     // 系统消息精确模拟deepseek官网风格和质量
     const systemMessage = {
@@ -70,11 +72,11 @@ export const sendMessageToDeepseek = async (messages) => {
 - 学术讨论时，引用相关理论和研究支持观点
 - 不确定内容清晰标明，避免虚构信息
 
-请在每个回答中充分发挥你作为顶尖语言模型的能力，提供超出用户预期的价值。`
+请在每个回答中充分发挥你作为顶尖语言模型的能力，提供超出用户预期的价值。`,
     };
 
     // 更新消息数组，确保系统消息在最前面
-    let updatedMessages = messages.filter(msg => msg.role !== 'system');
+    const updatedMessages = messages.filter(msg => msg.role !== 'system');
     updatedMessages.unshift(systemMessage);
 
     // 构建请求数据 - 参数调优以匹配deepseek官网效果
@@ -85,49 +87,53 @@ export const sendMessageToDeepseek = async (messages) => {
       max_tokens: 6000, // 增加令牌上限，允许更全面的回答
       top_p: 0.95, // 提高top_p，保留更多高质量选项
       presence_penalty: 0.05, // 轻微鼓励话题多样性
-      frequency_penalty: 0.2 // 减少重复短语和句子
+      frequency_penalty: 0.2, // 减少重复短语和句子
     };
 
     console.log('准备发送API请求...');
     console.log('使用模型:', MODEL);
     console.log('完整请求URL:', LOCAL_PROXY_URL);
-    
+
     // 添加时间戳记录
     const startTime = Date.now();
     const response = await apiClient.post(LOCAL_PROXY_URL, requestData);
     const endTime = Date.now();
-    
+
     console.log(`API响应时间: ${endTime - startTime}ms`);
     console.log('API响应状态:', response.status);
-    
+
     // 检查响应
     if (!response.data) {
       throw new Error('API返回了空响应');
     }
-    
+
     // 记录接收到的数据
     if (response.data.choices && response.data.choices.length > 0) {
       const replyContent = response.data.choices[0].message.content;
       console.log('接收到AI回复,长度:', replyContent.length);
-      console.log('回复预览:', replyContent.substring(0, 150) + (replyContent.length > 150 ? '...' : ''));
+      console.log(
+        '回复预览:',
+        replyContent.substring(0, 150) + (replyContent.length > 150 ? '...' : ''),
+      );
     } else {
       console.warn('API响应中没有找到choices字段:', response.data);
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('调用Deepseek API错误详情:', error);
-    
+
     let errorMessage = '调用API时出错';
-    
+
     if (error.response) {
       // 服务器响应了，但返回错误状态码
       console.error('错误响应状态:', error.response.status);
-      
+
       if (error.response.data && error.response.data.error) {
-        errorMessage = typeof error.response.data.error === 'string' 
-          ? error.response.data.error 
-          : JSON.stringify(error.response.data.error);
+        errorMessage =
+          typeof error.response.data.error === 'string'
+            ? error.response.data.error
+            : JSON.stringify(error.response.data.error);
       } else if (error.response.data && error.response.data.message) {
         errorMessage = error.response.data.message;
       } else if (error.response.data && error.response.data.details) {
@@ -144,22 +150,22 @@ export const sendMessageToDeepseek = async (messages) => {
       console.error('请求配置错误:', error.message);
       errorMessage = `请求错误: ${error.message}`;
     }
-    
+
     // 记录最终的错误消息
     console.error('将向用户显示的错误:', errorMessage);
-    
+
     // 提供更友好的错误消息
     if (errorMessage.includes('404')) {
       errorMessage = '服务器无法找到请求的API。可能是API地址错误或服务不可用。请检查服务器设置。';
     } else if (errorMessage.includes('Network Error')) {
       errorMessage = '无法连接到后端服务器。请确保后端服务器(http://localhost:3001)正在运行。';
     }
-    
+
     // 自定义error对象
     const enhancedError = new Error(errorMessage);
     enhancedError.originalError = error;
     enhancedError.isApiError = true;
-    
+
     throw enhancedError;
   }
 };
@@ -169,9 +175,9 @@ export const sendMessageToDeepseek = async (messages) => {
  * @param {Array} appMessages - 应用内的消息数组
  * @returns {Array} 格式化后的消息数组，适用于API
  */
-export const formatMessagesForAPI = (appMessages) => {
+export const formatMessagesForAPI = appMessages => {
   return appMessages.map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'assistant',
-    content: msg.content
+    content: msg.content,
   }));
-}; 
+};

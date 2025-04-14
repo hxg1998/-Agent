@@ -6,6 +6,7 @@ const API_URL = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3
 const API_KEY = process.env.API_KEY;
 const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
 
+// 简化请求处理以减少内存使用
 module.exports = async (req, res) => {
   // 设置CORS头
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -29,7 +30,6 @@ module.exports = async (req, res) => {
   try {
     // 检查API密钥
     if (!API_KEY) {
-      console.error('错误: API_KEY环境变量未设置');
       return res.status(500).json({
         error: '服务器配置错误',
         message: 'API密钥未配置。请在Vercel项目中设置API_KEY环境变量。'
@@ -37,16 +37,8 @@ module.exports = async (req, res) => {
     }
 
     // 从请求中提取参数
-    const { 
-      messages, 
-      model = MODEL, 
-      temperature,
-      max_tokens,
-      top_p,
-      presence_penalty,
-      frequency_penalty
-    } = req.body;
-    
+    const { messages, model = MODEL, temperature, max_tokens, top_p } = req.body;
+
     // 验证请求参数
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({
@@ -54,63 +46,55 @@ module.exports = async (req, res) => {
         message: 'messages字段必须是一个包含消息对象的数组'
       });
     }
-    
-    // 构建请求数据对象
+
+    // 构建精简的请求数据对象
     const requestData = {
       model: model || MODEL,
       messages,
       stream: false
     };
-    
-    // 添加可选参数（如果提供）
+
+    // 仅添加必要的可选参数
     if (temperature !== undefined) requestData.temperature = temperature;
     if (max_tokens !== undefined) requestData.max_tokens = max_tokens;
     if (top_p !== undefined) requestData.top_p = top_p;
-    if (presence_penalty !== undefined) requestData.presence_penalty = presence_penalty;
-    if (frequency_penalty !== undefined) requestData.frequency_penalty = frequency_penalty;
-    
-    // 创建Axios配置
+
+    // 创建Axios配置 - 减少超时时间适应Vercel函数限制
     const config = {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_KEY}`
       },
-      timeout: 180000 // 增加超时时间到180秒
+      timeout: 25000 // 25秒超时
     };
-    
-    // 发送请求到Deepseek API
+
+    // 发送请求到API
     const response = await axios.post(API_URL, requestData, config);
-    
+
     // 将响应发送回客户端
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error('服务器错误:', error.message);
-    
+    // 简化错误处理
     let errorMessage = '与Deepseek API通信时发生错误';
     let statusCode = 500;
-    
+
     if (error.response) {
-      // 从API响应中提取错误信息
       statusCode = error.response.status;
-      
-      if (error.response.data && error.response.data.error) {
-        errorMessage = `API错误: ${JSON.stringify(error.response.data.error)}`;
-      } else if (error.response.data) {
-        errorMessage = `API错误: ${JSON.stringify(error.response.data)}`;
-      }
+      errorMessage = error.response.data?.error?.message ||
+                     error.response.data?.error ||
+                     `API错误(${statusCode})`;
     } else if (error.code === 'ECONNABORTED') {
-      errorMessage = 'API请求超时。请尝试减少消息长度或增加超时时间。';
-      statusCode = 504; // Gateway Timeout
+      statusCode = 504;
+      errorMessage = 'API请求超时，请稍后重试';
     } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      errorMessage = `无法连接到Deepseek API (${error.code})。请检查API URL和网络连接。`;
-      statusCode = 502; // Bad Gateway
+      statusCode = 502;
+      errorMessage = '无法连接到API服务';
     }
-    
-    // 返回格式化的错误响应
+
     return res.status(statusCode).json({
       error: '处理请求失败',
       message: errorMessage,
       timestamp: new Date().toISOString()
     });
   }
-}; 
+};
