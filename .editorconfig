@@ -1,0 +1,21 @@
+# EditorConfig帮助在不同的编辑器和IDE之间保持一致的编码风格
+# https://editorconfig.org/
+
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{js,jsx,ts,tsx,css,scss,json,html}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab

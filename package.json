@@ -12,7 +12,19 @@
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-watch": "^8.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
+    "prettier": "^3.5.3",
+    "stylelint": "^16.18.0",
+    "stylelint-config-standard": "^38.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -23,7 +35,18 @@
     "dev": "concurrently \"npm run server\" \"npm run start\"",
     "kill-port": "node kill-server.js",
     "restart-server": "node kill-server.js && node server.js",
-    "vercel-build": "DISABLE_ESLINT_PLUGIN=true CI=false react-scripts build --no-eslint"
+    "vercel-build": "DISABLE_ESLINT_PLUGIN=true CI=false react-scripts build --no-eslint",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint src --ext .js,.jsx --fix",
+    "precommit": "npm run lint",
+    "dev:lint": "concurrently \"npm run server\" \"npm run start\" \"npm run lint:watch\"",
+    "lint:watch": "esw -w src --ext .js,.jsx --color",
+    "prepare": "husky install",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,json,css}\"",
+    "css:lint": "stylelint \"src/**/*.css\"",
+    "css:fix": "stylelint \"src/**/*.css\" --fix",
+    "check": "node lint-check.js"
   },
   "eslintConfig": {
     "extends": [

@@ -1,0 +1,71 @@
+diff --git a/package.json b/package.json
+index 1234567..7654321 100644
+--- a/package.json
++++ b/package.json
+@@ -22,7 +22,7 @@
+     "dev": "concurrently \"npm run server\" \"npm run start\"",
+     "kill-port": "node kill-server.js",
+     "restart-server": "node kill-server.js && node server.js",
+-    "vercel-build": "CI=false react-scripts build"
++    "vercel-build": "CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build"
+   },
+   "eslintConfig": {
+     "extends": [
+diff --git a/src/components/Chat.jsx b/src/components/Chat.jsx
+index 1234567..7654321 100644
+--- a/src/components/Chat.jsx
++++ b/src/components/Chat.jsx
+@@ -1,4 +1,4 @@
+-import React, { useState, useEffect, useRef, useMemo } from 'react';
++import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import Message from './Message';
+ import MessageInput from './MessageInput';
+ import { sendMessageToDeepseek, formatMessagesForAPI } from '../services/api';
+@@ -82,7 +82,7 @@ const Chat = ({ currentConversation }) => {
+   }, []);
+ 
+   // 加载历史消息
+-  const loadMessagesFromStorage = (sessionId) => {
++  const loadMessagesFromStorage = useCallback((sessionId) => {
+     try {
+       const key = `${CHAT_HISTORY_KEY_PREFIX}${sessionId}`;
+       const storedData = localStorage.getItem(key);
+@@ -106,7 +106,7 @@ const Chat = ({ currentConversation }) => {
+     }
+     
+     return conversationsData[sessionId] || [];
+-  };
++  }, [conversationsData]);
+ 
+ diff --git a/src/components/Sidebar.jsx b/src/components/Sidebar.jsx
+index 1234567..7654321 100644
+--- a/src/components/Sidebar.jsx
++++ b/src/components/Sidebar.jsx
+@@ -1,12 +1,11 @@
+-import React, { useState } from 'react';
++import React from 'react';
+ import Logo from './Logo';
+ import FeatureList from './FeatureList';
+ import ConversationList from './ConversationList';
+ 
+ const Sidebar = ({ onChangeConversation }) => {
+-  const [, setSelectedFeature] = useState(null);
+   
+   const handleFeatureSelect = (feature) => {
+-    setSelectedFeature(feature);
+     
+     // 通知App组件功能已更改
+     if (onChangeConversation) {
+diff --git a/src/services/api.js b/src/services/api.js
+index 1234567..7654321 100644
+--- a/src/services/api.js
++++ b/src/services/api.js
+@@ -1,7 +1,7 @@
+ import axios from 'axios';
+ 
+ // 从环境变量加载配置（生产环境）或默认值（开发环境）
+-const API_ENDPOINT = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
++// 以下环境变量配置会被使用
+ const API_KEY = process.env.API_KEY; // 不提供默认值以强制配置
+ const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
+ 

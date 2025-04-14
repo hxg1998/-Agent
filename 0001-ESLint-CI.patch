@@ -1,0 +1,87 @@
+From 2173499fac5d334b42019ca3302f6e17b4e2d81b Mon Sep 17 00:00:00 2001
+From: hxg1998 <87716159+hxg1998@users.noreply.github.com>
+Date: Mon, 14 Apr 2025 00:17:07 +0800
+Subject: [PATCH] =?UTF-8?q?=E4=BF=AE=E5=A4=8DESLint=E8=AD=A6=E5=91=8A?=
+ =?UTF-8?q?=E5=92=8CCI=E8=AE=BE=E7=BD=AE=EF=BC=8C=E8=A7=A3=E5=86=B3?=
+ =?UTF-8?q?=E9=83=A8=E7=BD=B2=E9=97=AE=E9=A2=98?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/components/Chat.jsx    | 2 +-
+ src/components/Message.jsx | 2 +-
+ src/components/Sidebar.jsx | 2 +-
+ src/services/api.js        | 2 +-
+ vercel.json                | 7 ++++++-
+ 5 files changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/src/components/Chat.jsx b/src/components/Chat.jsx
+index 8f69006..c1a18a3 100644
+--- a/src/components/Chat.jsx
++++ b/src/components/Chat.jsx
+@@ -202,7 +202,7 @@ const Chat = ({ currentConversation }) => {
+     
+     // 清理过期的消息历史
+     cleanupExpiredMessages();
+-  }, [currentConversation, conversationsData]);
++  }, [currentConversation, conversationsData, loadMessagesFromStorage]);
+ 
+   // 将消息保存到state和本地存储
+   const updateMessages = (newMessages) => {
+diff --git a/src/components/Message.jsx b/src/components/Message.jsx
+index 523db42..e008afb 100644
+--- a/src/components/Message.jsx
++++ b/src/components/Message.jsx
+@@ -1,4 +1,4 @@
+-import React, { useState } from 'react';
++import React from 'react';
+ import FormattedMessage from './FormattedMessage';
+ 
+ const Message = ({ message, onEdit }) => {
+diff --git a/src/components/Sidebar.jsx b/src/components/Sidebar.jsx
+index 671afaf..f7e569e 100644
+--- a/src/components/Sidebar.jsx
++++ b/src/components/Sidebar.jsx
+@@ -4,7 +4,7 @@ import FeatureList from './FeatureList';
+ import ConversationList from './ConversationList';
+ 
+ const Sidebar = ({ onChangeConversation }) => {
+-  const [selectedFeature, setSelectedFeature] = useState(null);
++  const [, setSelectedFeature] = useState(null);
+   
+   const handleFeatureSelect = (feature) => {
+     setSelectedFeature(feature);
+diff --git a/src/services/api.js b/src/services/api.js
+index 4df5ab7..90d08e1 100644
+--- a/src/services/api.js
++++ b/src/services/api.js
+@@ -1,7 +1,7 @@
+ import axios from 'axios';
+ 
+ // 从环境变量加载配置（生产环境）或默认值（开发环境）
+-const API_URL = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
++const API_ENDPOINT = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+ const API_KEY = process.env.API_KEY; // 不提供默认值以强制配置
+ const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
+ 
+diff --git a/vercel.json b/vercel.json
+index 689d34e..097863c 100644
+--- a/vercel.json
++++ b/vercel.json
+@@ -44,5 +44,10 @@
+       "src": "^/(.*)",
+       "dest": "/index.html"
+     }
+-  ]
++  ],
++  "build": {
++    "env": {
++      "CI": "false"
++    }
++  }
+ } 
+\ No newline at end of file
+-- 
+2.39.2 (Apple Git-143)
+

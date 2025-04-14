@@ -24,7 +24,9 @@ yarn-error.log*
 
 # 编辑器目录和文件
 .idea
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.swp
 *.swo
 
@@ -34,4 +36,6 @@ Thumbs.db
 
 # 缓存
 .npm
-.eslintcache 
+.eslintcache
+.stylelintcache
+.prettier-cache
