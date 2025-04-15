@@ -99,11 +99,16 @@ export const sendMessageToDeepseek = async messages => {
 
     // 在Vercel环境中，修正API路径
     let apiUrl = LOCAL_PROXY_URL;
-    // 检查当前是否在Vercel环境并修正URL
-    if (process.env.NODE_ENV === 'production' && window.location.hostname.includes('vercel.app')) {
-      // 使用绝对路径而非相对路径
+
+    // 更加全面的环境检查
+    if (process.env.NODE_ENV === 'production') {
+      console.log('生产环境检测，使用以下信息确定API路径:');
+      console.log('- 当前域名:', window.location.hostname);
+      console.log('- 当前源:', window.location.origin);
+
+      // 始终在生产环境中使用绝对路径
       apiUrl = `${window.location.origin}/api/chat`;
-      console.log('Vercel环境检测到，使用绝对路径:', apiUrl);
+      console.log('最终决定使用API路径:', apiUrl);
     }
 
     const response = await apiClient.post(apiUrl, requestData);
