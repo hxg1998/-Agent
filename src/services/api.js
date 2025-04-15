@@ -1,16 +1,10 @@
 import axios from 'axios';
 
 // 从环境变量加载配置（生产环境）或默认值（开发环境）
-// 以下环境变量配置会被使用
-const API_KEY = process.env.REACT_APP_API_KEY || process.env.API_KEY; // 支持通过REACT_APP前缀访问
-const MODEL = process.env.REACT_APP_MODEL_NAME || process.env.MODEL_NAME || 'deepseek-r1-250120';
+// 仅加载前端可以安全使用的配置
+const MODEL = process.env.REACT_APP_MODEL_NAME || 'deepseek-r1-250120';
 
-// 验证API密钥是否已配置 - 客户端不再需要API密钥，由服务端处理
-// if (!API_KEY && process.env.NODE_ENV === 'production') {
-//   console.error('错误: API_KEY环境变量未设置。请在.env文件中配置API_KEY。');
-//   // 在生产环境中，如果未设置API密钥则抛出错误
-//   throw new Error('API密钥未配置');
-// }
+// 注意：API密钥现在完全由后端管理，不再在前端检查或使用
 
 // 根据环境选择API端点
 // 在Vercel上使用相对路径，在本地开发使用完整URL
