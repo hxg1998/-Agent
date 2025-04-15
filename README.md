@@ -57,7 +57,3 @@ npm run build
 - React
 - CSS
 - SVG
-
-## 更新日志
-
-- 2024-06-27: 添加Vercel Serverless API功能
