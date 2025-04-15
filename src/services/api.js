@@ -96,7 +96,17 @@ export const sendMessageToDeepseek = async messages => {
 
     // 添加时间戳记录
     const startTime = Date.now();
-    const response = await apiClient.post(LOCAL_PROXY_URL, requestData);
+
+    // 在Vercel环境中，修正API路径
+    let apiUrl = LOCAL_PROXY_URL;
+    // 检查当前是否在Vercel环境并修正URL
+    if (process.env.NODE_ENV === 'production' && window.location.hostname.includes('vercel.app')) {
+      // 使用绝对路径而非相对路径
+      apiUrl = `${window.location.origin}/api/chat`;
+      console.log('Vercel环境检测到，使用绝对路径:', apiUrl);
+    }
+
+    const response = await apiClient.post(apiUrl, requestData);
     const endTime = Date.now();
 
     console.log(`API响应时间: ${endTime - startTime}ms`);

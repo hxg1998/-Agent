@@ -57,8 +57,7 @@ const Chat = ({ currentConversation }) => {
       },
       {
         id: 2,
-        // eslint-disable-next-line no-useless-escape
-        content: '"AI时代"是指人工智能（Artificial Intelligence，简称AI）技术在社会各领域广泛应用并深刻影响人类生活的历史阶段。这一时代的到来标志着机器不仅能执行简单任务，还能进行学习、推理、决策和创造，逐步与人类的认知能力相媲美，甚至在某些方面超越人类。\n\n🧠 AI时代的核心特征\n智能化的机器与系统\L AI系统能够模拟人类的学习、思考、规划、判断、决策和行动等认知过程，展现出类似人类的推理和认知特征。\n技术的普及与深度渗透\L AI技术已广泛应用于医疗、金融、教育、交通、制造等多个行业，深刻改变了人类的生产和生活方式。\n人机协作的新时代\L AI与人类的协作关系日益密切，AI不仅是工具，更成为人类的伙伴，共同推动社会进步。\n\n🔍 AI时代的技术演进\nAI技术经历了从"信息AI"到"代理AI"的发展过程，逐步向更高级的"物理AI"和"意识AI"迈进。 这些进展使得AI系统在处理复杂任务、适应环境变化和自主决策等方面表现出更强的能力。 \n\n🌐 AI时代的社会影响\n经济转型：AI预计将为全球经济贡献数万亿美元，推动生产力提升和产业结构优化。\n伦理与治理挑战：随着AI技术的发展，如何确保其安全、透明和公平，成为全球关注的焦点。',
+        content: '"AI时代"是指人工智能（Artificial Intelligence，简称AI）技术在社会各领域广泛应用并深刻影响人类生活的历史阶段。这一时代的到来标志着机器不仅能执行简单任务，还能进行学习、推理、决策和创造，逐步与人类的认知能力相媲美，甚至在某些方面超越人类。\n\n🧠 AI时代的核心特征\n智能化的机器与系统 AI系统能够模拟人类的学习、思考、规划、判断、决策和行动等认知过程，展现出类似人类的推理和认知特征。\n技术的普及与深度渗透 AI技术已广泛应用于医疗、金融、教育、交通、制造等多个行业，深刻改变了人类的生产和生活方式。\n人机协作的新时代 AI与人类的协作关系日益密切，AI不仅是工具，更成为人类的伙伴，共同推动社会进步。\n\n🔍 AI时代的技术演进\nAI技术经历了从"信息AI"到"代理AI"的发展过程，逐步向更高级的"物理AI"和"意识AI"迈进。 这些进展使得AI系统在处理复杂任务、适应环境变化和自主决策等方面表现出更强的能力。 \n\n🌐 AI时代的社会影响\n经济转型：AI预计将为全球经济贡献数万亿美元，推动生产力提升和产业结构优化。\n伦理与治理挑战：随着AI技术的发展，如何确保其安全、透明和公平，成为全球关注的焦点。',
         sender: 'ai',
         timestamp: new Date('2023-05-20T20:32:30')
       }
@@ -82,6 +81,13 @@ const Chat = ({ currentConversation }) => {
   useEffect(() => {
     const checkBackendStatus = async () => {
       try {
+        // 在Vercel环境中，我们不需要检查本地后端
+        if (process.env.NODE_ENV === 'production' && window.location.hostname.includes('vercel.app')) {
+          console.log('在Vercel环境中，使用内置API，无需检查本地后端');
+          setBackendStatus('connected');
+          return;
+        }
+
         const response = await fetch('http://localhost:3001/api/test');
         if (response.ok) {
           console.log('后端服务器连接正常');
@@ -92,10 +98,16 @@ const Chat = ({ currentConversation }) => {
         }
       } catch (error) {
         console.error('后端服务器连接失败:', error);
-        setBackendStatus('error');
+        // 在生产环境中，如果无法连接本地后端，我们假设使用Vercel API
+        if (process.env.NODE_ENV === 'production') {
+          console.log('生产环境中假设使用Vercel API');
+          setBackendStatus('connected');
+        } else {
+          setBackendStatus('error');
+        }
       }
     };
-    
+
     checkBackendStatus();
   }, []);
 
@@ -104,48 +116,48 @@ const Chat = ({ currentConversation }) => {
     try {
       const key = `${CHAT_HISTORY_KEY_PREFIX}${sessionId}`;
       const storedData = localStorage.getItem(key);
-      
+
       if (storedData) {
         const parsedData = JSON.parse(storedData);
-        
+
         // 检查是否过期
         if (parsedData.expiry && new Date() > new Date(parsedData.expiry)) {
           // 已过期，清除存储
           localStorage.removeItem(key);
           return conversationsData[sessionId] || [];
         }
-        
+
         // 将字符串时间戳转换回Date对象
         const messagesWithDateObjects = parsedData.messages.map(msg => ({
           ...msg,
           timestamp: new Date(msg.timestamp)
         }));
-        
+
         return messagesWithDateObjects;
       }
     } catch (error) {
       console.error('加载历史消息出错:', error);
     }
-    
+
     return conversationsData[sessionId] || [];
   }, [conversationsData]);
 
   // 保存消息到本地存储
   const saveMessagesToStorage = (sessionId, messagesToSave) => {
     if (!sessionId) return;
-    
+
     try {
       const key = `${CHAT_HISTORY_KEY_PREFIX}${sessionId}`;
-      
+
       // 设置过期时间（30天后）
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + HISTORY_EXPIRY_DAYS);
-      
+
       const dataToStore = {
         messages: messagesToSave,
         expiry: expiryDate.toISOString()
       };
-      
+
       localStorage.setItem(key, JSON.stringify(dataToStore));
       console.log(`消息已保存到本地存储，过期时间: ${expiryDate.toLocaleString()}`);
     } catch (error) {
@@ -158,13 +170,13 @@ const Chat = ({ currentConversation }) => {
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        
+
         if (key && key.startsWith(CHAT_HISTORY_KEY_PREFIX)) {
           const storedData = localStorage.getItem(key);
-          
+
           if (storedData) {
             const parsedData = JSON.parse(storedData);
-            
+
             if (parsedData.expiry && new Date() > new Date(parsedData.expiry)) {
               localStorage.removeItem(key);
               console.log(`已删除过期的消息历史: ${key}`);
@@ -181,15 +193,15 @@ const Chat = ({ currentConversation }) => {
   useEffect(() => {
     if (currentConversation) {
       let key = '';
-      
+
       if (currentConversation.type === 'feature' && currentConversation.feature) {
         key = `feature-${currentConversation.feature.id}`;
       } else if (currentConversation.type === 'conversation' && currentConversation.conversation) {
         key = `conversation-${currentConversation.conversation.id}`;
       }
-      
+
       setCurrentSessionId(key);
-      
+
       if (key) {
         // 从本地存储中加载消息
         const loadedMessages = loadMessagesFromStorage(key);
@@ -199,7 +211,7 @@ const Chat = ({ currentConversation }) => {
         setMessages([]);
       }
     }
-    
+
     // 清理过期的消息历史
     cleanupExpiredMessages();
   }, [currentConversation, conversationsData, loadMessagesFromStorage]);
@@ -207,7 +219,7 @@ const Chat = ({ currentConversation }) => {
   // 将消息保存到state和本地存储
   const updateMessages = (newMessages) => {
     setMessages(newMessages);
-    
+
     // 保存到本地存储
     if (currentSessionId) {
       saveMessagesToStorage(currentSessionId, newMessages);
@@ -217,9 +229,9 @@ const Chat = ({ currentConversation }) => {
   const handleSendMessage = async (content) => {
     if (editingMessage) {
       // 更新已有消息
-      const updatedMessages = messages.map(msg => 
-        msg.id === editingMessage.id 
-          ? { ...msg, content, timestamp: new Date() } 
+      const updatedMessages = messages.map(msg =>
+        msg.id === editingMessage.id
+          ? { ...msg, content, timestamp: new Date() }
           : msg
       );
       updateMessages(updatedMessages);
@@ -232,38 +244,38 @@ const Chat = ({ currentConversation }) => {
         sender: 'user',
         timestamp: new Date()
       };
-      
+
       // 立即将用户消息添加到对话
       const updatedMessages = [...messages, newUserMessage];
       updateMessages(updatedMessages);
       console.log('用户消息已添加到对话');
-      
+
       // 调用Deepseek API获取回复
       try {
         setIsLoading(true);
         console.log('开始API调用流程...');
-        
+
         // 准备发送给API的消息记录
         const apiMessages = formatMessagesForAPI(updatedMessages);
         console.log('格式化的API消息:', apiMessages);
-        
+
         // 调用API
         console.log('调用sendMessageToDeepseek...');
         const response = await sendMessageToDeepseek(apiMessages);
         console.log('API调用成功, 收到响应');
-        
+
         // 处理API返回的结果
         if (response && response.choices && response.choices.length > 0) {
           const aiResponse = response.choices[0].message.content;
           console.log('解析AI回复成功，长度:', aiResponse.length);
-          
+
           const newAiMessage = {
             id: updatedMessages.length > 0 ? Math.max(...updatedMessages.map(m => m.id)) + 1 : 1,
             content: aiResponse,
             sender: 'ai',
             timestamp: new Date()
           };
-          
+
           // 将AI回复添加到对话
           const finalMessages = [...updatedMessages, newAiMessage];
           updateMessages(finalMessages);
@@ -274,11 +286,11 @@ const Chat = ({ currentConversation }) => {
         }
       } catch (error) {
         console.error('获取AI回复时出错:', error);
-        
+
         // 获取错误消息
         let errorMessage = error.message || '调用API时出错';
         console.error('错误消息:', errorMessage);
-        
+
         // 显示错误消息
         const aiErrorMessage = {
           id: updatedMessages.length > 0 ? Math.max(...updatedMessages.map(m => m.id)) + 1 : 1,
@@ -286,7 +298,7 @@ const Chat = ({ currentConversation }) => {
           sender: 'ai',
           timestamp: new Date()
         };
-        
+
         // 将错误消息添加到对话
         const finalMessages = [...updatedMessages, aiErrorMessage];
         updateMessages(finalMessages);
@@ -323,7 +335,7 @@ const Chat = ({ currentConversation }) => {
           ⚠️ 无法连接到后端服务器，请确保服务器正在运行 (http://localhost:3001)
         </div>
       )}
-      
+
       <div className="conversation">
         {messages.length === 0 ? (
           <div className="empty-conversation">
@@ -331,9 +343,9 @@ const Chat = ({ currentConversation }) => {
           </div>
         ) : (
           messages.map(message => (
-            <Message 
-              key={message.id} 
-              message={message} 
+            <Message
+              key={message.id}
+              message={message}
               onEdit={handleEditMessage}
             />
           ))
@@ -351,10 +363,10 @@ const Chat = ({ currentConversation }) => {
         )}
         <div ref={chatEndRef} />
       </div>
-      
-      <MessageInput 
-        onSendMessage={handleSendMessage} 
-        initialValue={editingMessage ? editingMessage.content : ''} 
+
+      <MessageInput
+        onSendMessage={handleSendMessage}
+        initialValue={editingMessage ? editingMessage.content : ''}
         isEditing={!!editingMessage}
         onCancelEdit={() => setEditingMessage(null)}
         disabled={isLoading || backendStatus === 'error'}
@@ -363,4 +375,4 @@ const Chat = ({ currentConversation }) => {
   );
 };
 
-export default Chat; 
+export default Chat;
