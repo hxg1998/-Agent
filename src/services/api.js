@@ -191,3 +191,46 @@ export const formatMessagesForAPI = appMessages => {
     content: msg.content,
   }));
 };
+
+/**
+ * 检查API服务器配置状态
+ * @returns {Promise} Promise对象，解析为服务器配置状态
+ */
+export const checkServerConfig = async () => {
+  try {
+    // 确定健康检查API的URL
+    let healthUrl =
+      process.env.NODE_ENV === 'production' ? '/api/health' : 'http://localhost:3001/api/health';
+
+    // 在Vercel环境中使用绝对路径
+    if (process.env.NODE_ENV === 'production' && window.location.hostname.includes('vercel.app')) {
+      healthUrl = `${window.location.origin}/api/health`;
+    }
+
+    console.log('检查服务器配置状态:', healthUrl);
+    const response = await axios.get(healthUrl);
+
+    if (response.data && response.data.envStatus) {
+      console.log('服务器环境变量状态:', response.data.envStatus);
+
+      // 如果API密钥未配置，显示警告
+      if (!response.data.envStatus.API_KEY_CONFIGURED) {
+        console.error('警告: 服务器上未配置API_KEY，API调用将失败');
+        alert('服务器配置错误: API密钥未设置，请联系管理员配置Vercel环境变量');
+      } else {
+        console.log('服务器API密钥已正确配置');
+      }
+
+      return response.data;
+    }
+
+    return { status: '未检测到环境变量信息' };
+  } catch (error) {
+    console.error('检查服务器配置失败:', error);
+    return {
+      status: '错误',
+      error: error.message,
+      suggestion: '请确保服务器正在运行并可访问',
+    };
+  }
+};

@@ -6,6 +6,12 @@ const API_URL = process.env.API_URL || 'https://ark.cn-beijing.volces.com/api/v3
 const API_KEY = process.env.API_KEY;
 const MODEL = process.env.MODEL_NAME || 'deepseek-r1-250120';
 
+// 添加环境变量日志
+console.log('环境变量检查:');
+console.log('API_KEY存在:', !!API_KEY);
+console.log('API_URL:', API_URL);
+console.log('MODEL:', MODEL);
+
 // 简化请求处理以减少内存使用
 module.exports = async (req, res) => {
   // CORS头已在入口文件中设置

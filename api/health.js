@@ -1,18 +1,19 @@
-// Vercel健康检查API端点 - 轻量级实现
+// 健康检查API接口
 module.exports = (req, res) => {
-  // 设置CORS头
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  // 检查环境变量是否配置（不暴露具体值）
+  const envStatus = {
+    API_KEY_CONFIGURED: !!process.env.API_KEY,
+    API_URL_CONFIGURED: !!process.env.API_URL,
+    MODEL_NAME: process.env.MODEL_NAME || 'deepseek-r1-250120',
+    NODE_ENV: process.env.NODE_ENV || 'development'
+  };
 
-  // 对预检请求的处理
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // 返回简化的健康状态 - 减少JSON大小
+  // 返回健康状态和环境变量检查
   return res.status(200).json({
-    status: 'UP',
-    env: process.env.NODE_ENV || 'development',
-    ts: new Date().toISOString()
+    status: 'API 正常运行中',
+    serverTime: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    envStatus: envStatus,
+    routes: ['/api', '/api/health', '/api/chat']
   });
 };
